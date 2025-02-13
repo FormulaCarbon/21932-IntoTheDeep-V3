@@ -310,9 +310,9 @@ public class IntoTheDeep extends LinearOpMode {
                 case 7: // High Basket
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
-                    //if (pivot.getCurrent() > 315) {
-                    extension.setPos("Basket");
-                    //}
+                    if (pivot.getCurrent() > 2090) {
+                        extension.setPos("Basket");
+                    }
                     wrist.setBicepPos("Basket");
                     wrist.setForearmPos("Basket");
                     break;
