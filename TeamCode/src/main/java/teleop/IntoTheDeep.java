@@ -50,6 +50,7 @@ public class IntoTheDeep extends LinearOpMode {
         waitForStart();
 
         wrist.setRotationPos(0);
+        specMec.idleClaw();
 
         if (isStopRequested()) return;
 
@@ -296,7 +297,7 @@ public class IntoTheDeep extends LinearOpMode {
                     pivot.setkP("Normal");
                     extension.setPos("Idle");
                     wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Basket");
+                    wrist.setForearmPos("Idle2");
                     wrist.setRotationPos(0);
                     break;
                 case 6: // Idle
@@ -309,9 +310,9 @@ public class IntoTheDeep extends LinearOpMode {
                 case 7: // High Basket
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
-                    //if (pivot.getCurrent() > 315) {
-                    extension.setPos("Basket");
-                    //}
+                    if (pivot.getCurrent() > 2090) {
+                        extension.setPos("Basket");
+                    }
                     wrist.setBicepPos("Basket");
                     wrist.setForearmPos("Basket");
                     break;

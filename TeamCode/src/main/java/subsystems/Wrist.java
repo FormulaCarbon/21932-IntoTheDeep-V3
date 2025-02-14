@@ -34,6 +34,7 @@ public class Wrist {
         forearmPositions.put("Intake",      0.0);
         forearmPositions.put("Basket",      fBasket);
         forearmPositions.put("Idle",        0.0);
+        forearmPositions.put("Idle2",       0.6);
         forearmPositions.put("Start",       1.0);
         forearmPositions.put("Auton Idle",  fIdle);
 
