@@ -38,5 +38,7 @@ public class Util {
         deviceConf.put("turn", "specTurn");
         deviceConf.put("specClaw", "specClaw");
         deviceConf.put("colorSensor", "sensor");
+        deviceConf.put("spinner", "spinner");
+        deviceConf.put("clamp", "clamp");
     }
 }
