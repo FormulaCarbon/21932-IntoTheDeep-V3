@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import subsystems.ActiveIntake;
 import subsystems.Util;
@@ -17,13 +18,17 @@ import subsystems.Util;
 @Config
 public class activeTest extends LinearOpMode {
     public static double change = 0.01;
-    public static String servoName = "Turn";
+    public static String servoName = "Turn", avoid = "Blue";
+
+    ElapsedTime spitTimer = new ElapsedTime();
+    boolean spitting = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Util util = new Util();
         ActiveIntake intake = new ActiveIntake(hardwareMap, util.deviceConf);
+        boolean auto = false;
 
         waitForStart();
 
@@ -40,6 +45,9 @@ public class activeTest extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 intake.off();
             }
+            if (gamepad1.dpad_left) {
+                intake.hold();
+            }
 
             if (gamepad1.a) {
                 intake.unclamp();
@@ -48,6 +56,34 @@ public class activeTest extends LinearOpMode {
                 intake.clamp();
             }
 
+            if (gamepad1.x) {
+                auto = !auto;
+            }
+
+            if (auto || spitting)
+            {
+                intake.intake();
+                if (intake.getBlockColor().equals(avoid) || spitting)
+                {
+                    if (!spitting)
+                    {
+                        spitTimer.reset();
+                        spitting = true;
+                    }
+                    intake.spit(spitTimer.seconds());
+                    auto = false;
+
+                }
+                else if (!intake.getBlockColor().equals("None")) {
+                    intake.hold();
+                    auto = false;
+                    spitting = false;
+                }
+
+            }
+
+
+
             intake.update();
 
             telemetry.addData("red", intake.getColors().red);
@@ -55,6 +91,18 @@ public class activeTest extends LinearOpMode {
             telemetry.addData("green", intake.getColors().green);
             telemetry.addData("alpha", intake.getColors().alpha);
             telemetry.addData("distance", intake.getDistance());
+            telemetry.addData("block", intake.getBlockColor());
+            telemetry.addData("auto", auto);
+            telemetry.addData("have",!intake.getBlockColor().equals("None"));
+            telemetry.addData("redD", intake.getDelta("Red"));
+            telemetry.addData("blueD", intake.getDelta("Blue"));
+            telemetry.addData("greenD", intake.getDelta("Green"));
+            telemetry.addData("time", intake.time());
+            telemetry.addData("blueL", intake.getLastColors().blue);
+            telemetry.addData("greenL", intake.getLastColors().green);
+            telemetry.addData("alphaL", intake.getLastColors().alpha);
+            telemetry.addData("spitting", spitting);
+            telemetry.addData("spittingt", spitTimer.seconds());
 
             telemetry.update();
 
