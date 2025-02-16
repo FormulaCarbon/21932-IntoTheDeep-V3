@@ -1,0 +1,337 @@
+package auton;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierCurve;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.PathChain;
+import com.pedropathing.pathgen.Point;
+import com.pedropathing.util.Constants;
+import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import pedroPathing.constants.FConstants;
+import pedroPathing.constants.LConstants;
+import subsystems.Pivot;
+import subsystems.Util;
+
+@Config
+@Autonomous
+public class Spe_Auton_5 extends OpMode {
+    private Follower follower;
+    private Util util = new Util();
+
+    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Pivot pivot;
+
+    public static double hangX = 40, pickX = 14, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 8, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 20, parkY = 66;
+
+    public static int pivotDownTime = 0;
+    /** This is the variable where we store the state of our auto.
+     * It is used by the pathUpdate method. */
+    private int pathState;
+
+    /* Create and Define Poses + Paths
+     * Poses are built with three constructors: x, y, and heading (in Radians).
+     * Pedro uses 0 - 144 for x and y, with 0, 0 being on the bottom left.
+     * (For Into the Deep, this would be Blue Observation Zone (0,0) to Red Observation Zone (144,144).)
+     * Even though Pedro uses a different coordinate system than RR, you can convert any roadrunner pose by adding +72 both the x and y.
+     * This visualizer is very easy to use to find and create paths/pathchains/poses: <https://pedro-path-generator.vercel.app/>
+     * Lets assume our robot is 18 by 18 inches
+     * Lets assume the Robot is facing the human player and we want to score in the bucket */
+
+    private final Pose startPose = new Pose(8, 64, Math.toRadians(270));
+
+    private final Pose hang0Pose = new Pose(hangX, hangY, Math.toRadians(0));
+
+    private final Pose pullOutPose = new Pose(32, 37, Math.toRadians(0));
+
+    private final Pose push1Pose = new Pose(blockX, blockY, Math.toRadians(0));
+    private final Pose push2Pose = new Pose(blockX, block2Y, Math.toRadians(0));
+    private final Pose push3Pose = new Pose(block3X, block3Y, Math.toRadians(0));
+
+    private final Pose pickupPose = new Pose(pickX, pickY, Math.toRadians(0));
+
+    private final Pose hang1Pose = new Pose(hangX, hangY-2, Math.toRadians(0));
+    private final Pose hang2Pose = new Pose(hangX, hangY-4, Math.toRadians(0));
+    private final Pose hang3Pose = new Pose(hangX, hangY-6, Math.toRadians(0));
+    private final Pose hang4Pose = new Pose(hangX, hangY-8, Math.toRadians(0));
+
+    private final Pose parkPose = new Pose(parkX-15, parkY, Math.toRadians(0));
+
+    private PathChain hangPreload, pushBlocks, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, park;
+
+    public void buildPaths() {
+        hangPreload = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(
+                                new Point(startPose), new Point(hang0Pose)
+                        )
+                )
+                .setLinearHeadingInterpolation(startPose.getHeading(), hang0Pose.getHeading())
+                .build();
+
+        pushBlocks = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(hang0Pose),
+                                new Point(8.769, 45.792, Point.CARTESIAN),
+                                new Point(pullOutPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addPath(
+                        new BezierCurve(
+                                new Point(pullOutPose),
+                                new Point(pushControlX, 32.931, Point.CARTESIAN),
+                                new Point(70.344, 25.916, Point.CARTESIAN),
+                                new Point(push1Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addPath(
+                        new BezierCurve(
+                                new Point(push1Pose),
+                                new Point(pushControlX, 26.696, Point.CARTESIAN),
+                                new Point(87.296, 16.173, Point.CARTESIAN),
+                                new Point(push2Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addPath(
+                        new BezierCurve(
+                                new Point(push2Pose),
+                                new Point(pushControlX, 15.004, Point.CARTESIAN),
+                                new Point(72.68200270635995, 6.820027063599452, Point.CARTESIAN),
+                                new Point(push3Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        pick1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(push3Pose),
+                                new Point(27.66982408660352, 34.48985115020297, Point.CARTESIAN),
+                                new Point(pickupPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        hang1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(pickupPose),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hang1Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        pick2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(hang1Pose),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(pickupPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        hang2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(pickupPose),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hang2Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        pick3 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(hang3Pose),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(pickupPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        hang3 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(pickupPose),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hang3Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        pick4 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(hang3Pose),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(pickupPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        hang4 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                new Point(pickupPose),
+                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hang4Pose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .build();
+
+        park = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(
+                                new Point(hang4Pose),
+                                new Point(parkPose)
+                        )
+                )
+                .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addTemporalCallback(pivotDownTime, () -> pivot.setPos("Down"))
+                .build();
+    }
+
+    public void autonomousPathUpdate() {
+        switch (pathState) {
+            case 0:
+                follower.followPath(hangPreload);
+                setPathState(1);
+                break;
+            case 1: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(pushBlocks, true);
+                    setPathState(2);
+                }
+                break;
+            case 2: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(pick1, true);
+                    setPathState(3);
+                }
+                break;
+            case 3: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(hang1, true);
+                    setPathState(4);
+                }
+                break;
+            case 4: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(pick2, true);
+                    setPathState(5);
+                }
+                break;
+            case 5: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(hang2, true);
+                    setPathState(6);
+                }
+                break;
+            case 6: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(pick3, true);
+                    setPathState(7);
+                }
+                break;
+            case 7: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(hang3, true);
+                    setPathState(8);
+                }
+                break;
+            case 8: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(pick4, true);
+                    setPathState(9);
+                }
+                break;
+            case 9: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(hang4, true);
+                    setPathState(10);
+                }
+                break;
+            case 10: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(park, true);
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                if (!follower.isBusy()) {
+                    setPathState(-1);
+                }
+                break;
+        }
+    }
+
+    public void setPathState(int pState) {
+        pathState = pState;
+        pathTimer.resetTimer();
+    }
+
+    @Override
+    public void init() {
+        pivot = new Pivot(hardwareMap, util.deviceConf);
+        pathTimer = new Timer();
+        pivot.setPos("Start");
+        Constants.setConstants(FConstants.class, LConstants.class);
+        follower = new Follower(hardwareMap);
+        follower.setStartingPose(startPose);
+        buildPaths();
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+        pivot.update();
+        autonomousPathUpdate();
+        telemetry.addData("Path State", pathState);
+        telemetry.addData("Position", follower.getPose().toString());
+        telemetry.addData("pos", pivot.getTarget());
+        telemetry.addData("pos", pivot.getPower());
+        telemetry.update();
+        follower.drawOnDashBoard();
+    }
+
+    @Override
+    public void start() {
+        pivot.setPos("Basket");
+        setPathState(0);
+    }
+
+    @Override
+    public void init_loop() {
+        pivot.update();
+    }
+    
+
+
+}
