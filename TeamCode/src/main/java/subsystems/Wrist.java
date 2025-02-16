@@ -16,25 +16,24 @@ public class Wrist {
     public static HashMap<String, Double> bicepPositions = new HashMap<String, Double>();
     public static HashMap<String, Double> forearmPositions = new HashMap<String, Double>();
 
-    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.86, fBasket = 0.92, bIdle = 0.88, fIdle = 0.63;
+    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.8467, fBasket = 0.895, bIdle = 0.75, fIdle = 0.895, bIntake = 0.92, fIntake = 0.5267;
 
     public static double[] rotationPositions = new double[5];
 
     public Wrist(HardwareMap hwMap, HashMap<String, String> config) {
         bicep = hwMap.servo.get(config.get("bicep"));
         forearm = hwMap.servo.get(config.get("forearm"));
-        rotation = hwMap.servo.get(config.get("rotation"));
+        //rotation = hwMap.servo.get(config.get("rotation"));
 
-        bicepPositions.put("Intake",      0.8761);
+        bicepPositions.put("Intake",      bIntake);
         bicepPositions.put("Basket",      bBasket);
-        bicepPositions.put("Idle",        0.8);
-        bicepPositions.put("Start",       0.71);
+        bicepPositions.put("Idle",        0.85);
+        bicepPositions.put("Start",       0.68);
         bicepPositions.put("Auton Idle",  bIdle);
 
-        forearmPositions.put("Intake",      0.0);
+        forearmPositions.put("Intake",      fIntake);
         forearmPositions.put("Basket",      fBasket);
-        forearmPositions.put("Idle",        0.0);
-        forearmPositions.put("Idle2",       0.6);
+        forearmPositions.put("Idle",        0.5267);
         forearmPositions.put("Start",       1.0);
         forearmPositions.put("Auton Idle",  fIdle);
 
@@ -51,7 +50,7 @@ public class Wrist {
     {
         bicep.setPosition(bicepPos);
         forearm.setPosition(forearmPos);
-        rotation.setPosition(rotationPos);
+        //rotation.setPosition(rotationPos);
     }
 
     public void setBicepPos(String pos)

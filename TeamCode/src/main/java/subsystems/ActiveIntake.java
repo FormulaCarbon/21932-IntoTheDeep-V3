@@ -22,11 +22,11 @@ public class ActiveIntake {
 
     private double tarPower, tarPos = clampUp;
 
-    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.007, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 20;
+    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 20;
 
     private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100;
 
-    public static double staticRed = 0.018, staticBlue = 0.028, staticGreen = 0.033, holdPow = 0.5;
+    public static double staticRed = 0.018, staticBlue = 0.028, staticGreen = 0.033, holdPow = 0.5, outPow = -0.2;
     private String blockColor = "None";
 
     private boolean holdingBlock = false;
@@ -82,7 +82,7 @@ public class ActiveIntake {
     }
 
     public void outtake() {
-        tarPower = -1.0;
+        tarPower = outPow;
     }
 
     public void off() {
@@ -129,10 +129,10 @@ public class ActiveIntake {
 
     public void spit(double time) {
         if (time < spitTime) {
-            outtake();
+            tarPower = -1.0;
         }
         else {
-            off();
+            intake();
         }
     }
 

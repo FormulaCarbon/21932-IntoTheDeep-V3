@@ -84,6 +84,8 @@ public class activeTest extends LinearOpMode {
 
 
 
+
+
             intake.update();
 
             telemetry.addData("red", intake.getColors().red);
