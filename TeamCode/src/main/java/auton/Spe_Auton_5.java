@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 import subsystems.Pivot;
+import subsystems.SpecMec;
 import subsystems.Util;
 
 @Config
@@ -25,10 +26,13 @@ public class Spe_Auton_5 extends OpMode {
 
     private Timer pathTimer, actionTimer, opmodeTimer;
     private Pivot pivot;
+    private SpecMec specMec;
 
-    public static double hangX = 40, pickX = 14, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 8, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 20, parkY = 66;
+    public static double hangX = 40, pickX = 13, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 8, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 20, parkY = 66;
 
-    public static int pivotDownTime = 0;
+    public static int pivotDownTime = 0, idleTime0 = 0, scoreTime0 = 800, openTime0 = 900, pullOutTime = 1000, closeTime1 = 500, idleTime = 1000, scoreTime = 1100, openTime = 1200, specMecDownTime = 500, closeTime = 1000, specMecParkTime = 500;
+
+    public static double pullOutPar = 0.5, idlePar = 0.2, scorePar = 0.9, openPar = 0.92, closePar = 0.92, specMecDownPar = 0.2, scorePar4 = 0.92, openPar4 = 0.94;
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
     private int pathState;
@@ -46,7 +50,7 @@ public class Spe_Auton_5 extends OpMode {
 
     private final Pose hang0Pose = new Pose(hangX, hangY, Math.toRadians(0));
 
-    private final Pose pullOutPose = new Pose(32, 37, Math.toRadians(0));
+    private final Pose pullOutPose = new Pose(43, 36, Math.toRadians(0));
 
     private final Pose push1Pose = new Pose(blockX, blockY, Math.toRadians(0));
     private final Pose push2Pose = new Pose(blockX, block2Y, Math.toRadians(0));
@@ -61,6 +65,9 @@ public class Spe_Auton_5 extends OpMode {
 
     private final Pose parkPose = new Pose(parkX-15, parkY, Math.toRadians(0));
 
+    private final Pose hangControl1 = new Pose(30.592692828146145, 31.7618403247632, Math.toRadians(0));
+    private final Pose hangControl2 = new Pose(22.99323410013532, 74.8254397834912, Math.toRadians(0));
+
     private PathChain hangPreload, pushBlocks, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, park;
 
     public void buildPaths() {
@@ -71,21 +78,25 @@ public class Spe_Auton_5 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(startPose.getHeading(), hang0Pose.getHeading())
+                .addTemporalCallback(idleTime0, () -> specMec.setPosition("Idle", "Score"))
+                .addTemporalCallback(scoreTime0, () -> specMec.setPosition("Score", "Score"))
+                .addTemporalCallback(openTime0, () -> specMec.openClaw())
                 .build();
 
         pushBlocks = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(hang0Pose),
-                                new Point(8.769, 45.792, Point.CARTESIAN),
+                                new Point(10.522327469553451, 46.765899864682005, Point.CARTESIAN),
                                 new Point(pullOutPose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(pullOutPar, () -> specMec.setPosition("Intake", "Intake"))
                 .addPath(
                         new BezierCurve(
                                 new Point(pullOutPose),
-                                new Point(pushControlX, 32.931, Point.CARTESIAN),
+                                new Point(pushControlX, 33.71041948579162, Point.CARTESIAN),
                                 new Point(70.344, 25.916, Point.CARTESIAN),
                                 new Point(push1Pose)
                         )
@@ -120,90 +131,109 @@ public class Spe_Auton_5 extends OpMode {
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addTemporalCallback(closeTime1, () -> specMec.closeClaw())
                 .build();
 
         hang1 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(pickupPose),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hangControl1),
+                                new Point(hangControl2),
                                 new Point(hang1Pose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
+                .addParametricCallback(scorePar, () -> specMec.setPosition("Score", "Score"))
+                .addParametricCallback(openPar, () -> specMec.openClaw())
                 .build();
 
         pick2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(hang1Pose),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(hangControl2),
+                                new Point(hangControl1),
                                 new Point(pickupPose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(specMecDownPar, () -> specMec.setPosition("Intake", "Intake"))
+                .addParametricCallback(closePar, () -> specMec.closeClaw())
                 .build();
 
         hang2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(pickupPose),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hangControl1),
+                                new Point(hangControl2),
                                 new Point(hang2Pose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
+                .addParametricCallback(scorePar, () -> specMec.setPosition("Score", "Score"))
+                .addParametricCallback(openPar, () -> specMec.openClaw())
                 .build();
 
         pick3 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(hang3Pose),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(hangControl2),
+                                new Point(hangControl1),
                                 new Point(pickupPose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(specMecDownPar, () -> specMec.setPosition("Intake", "Intake"))
+                .addParametricCallback(closePar, () -> specMec.closeClaw())
                 .build();
 
         hang3 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(pickupPose),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hangControl1),
+                                new Point(hangControl2),
                                 new Point(hang3Pose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
+                .addParametricCallback(scorePar, () -> specMec.setPosition("Score", "Score"))
+                .addParametricCallback(openPar, () -> specMec.openClaw())
                 .build();
 
         pick4 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(hang3Pose),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
+                                new Point(hangControl2),
+                                new Point(hangControl1),
                                 new Point(pickupPose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(specMecDownPar, () -> specMec.setPosition("Intake", "Intake"))
+                .addParametricCallback(closePar, () -> specMec.closeClaw())
                 .build();
 
         hang4 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(pickupPose),
-                                new Point(43.258, 32.152, Point.CARTESIAN),
-                                new Point(13.835, 75.020, Point.CARTESIAN),
+                                new Point(hangControl1),
+                                new Point(hangControl2),
                                 new Point(hang4Pose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
+                .addParametricCallback(scorePar4, () -> specMec.setPosition("Score", "Score"))
+                .addParametricCallback(openPar4, () -> specMec.openClaw())
                 .build();
 
         park = follower.pathBuilder()
@@ -215,6 +245,8 @@ public class Spe_Auton_5 extends OpMode {
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .addTemporalCallback(pivotDownTime, () -> pivot.setPos("Down"))
+                .addTemporalCallback(specMecParkTime, () -> specMec.setPosition("Intake", "Intake"))
+                .addTemporalCallback(specMecParkTime, () -> specMec.closeClaw())
                 .build();
     }
 
@@ -300,8 +332,11 @@ public class Spe_Auton_5 extends OpMode {
     @Override
     public void init() {
         pivot = new Pivot(hardwareMap, util.deviceConf);
+        specMec = new SpecMec(hardwareMap, util.deviceConf);
         pathTimer = new Timer();
         pivot.setPos("Start");
+        specMec.setPosition("Start", "Start");
+        specMec.closeClaw();
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -312,6 +347,8 @@ public class Spe_Auton_5 extends OpMode {
     public void loop() {
         follower.update();
         pivot.update();
+        specMec.update();
+        specMec.updateClaw();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
         telemetry.addData("Position", follower.getPose().toString());
@@ -330,6 +367,8 @@ public class Spe_Auton_5 extends OpMode {
     @Override
     public void init_loop() {
         pivot.update();
+        specMec.update();
+        specMec.updateClaw();
     }
     
 
