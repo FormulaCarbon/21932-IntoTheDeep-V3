@@ -60,6 +60,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            intake.clamp();
             turnReady = pivotReady = wristReady = extensionReady = swapReady = cycleReady = clawReady = true;
             drive.getXYZ(gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x);
 
@@ -178,6 +179,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
             if (auto || spitting)
             {
                 intake.intake();
+                /*intake.intake();
                 if (intake.getBlockColor().equals(avoid) || spitting)
                 {
                     if (!spitting)
@@ -200,7 +202,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 }
                 else {
                     auto = true;
-                }
+                }*/
 
             }
 
@@ -208,7 +210,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 intake.outtake();
             }
             else if (!auto) {
-                intake.hold();
+                intake.off();
             }
 
 

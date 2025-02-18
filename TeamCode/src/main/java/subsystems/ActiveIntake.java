@@ -18,15 +18,15 @@ public class ActiveIntake {
     ColorRangefinder sensor;
     NormalizedRGBA colors, lastColors;
     public static int ledBrightness = 100;
-    public static double clampUp = 0.27, clampDown = 0.45, spitTime = 0.5;
+    public static double clampUp = 0.26, clampDown = 0.4778, spitTime = 0.5;
 
     private double tarPower, tarPos = clampUp;
 
-    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 20;
+    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 30;
 
     private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100;
 
-    public static double staticRed = 0.018, staticBlue = 0.028, staticGreen = 0.033, holdPow = 0.5, outPow = -0.2;
+    public static double staticRed = 0.018, staticBlue = 0.028, staticGreen = 0.033, holdPow = 0, outPow = 0.2;
     private String blockColor = "None";
 
     private boolean holdingBlock = false;
@@ -78,7 +78,7 @@ public class ActiveIntake {
     }
 
     public void intake() {
-        tarPower = 1.0;
+        tarPower = -1.0;
     }
 
     public void outtake() {
@@ -136,5 +136,7 @@ public class ActiveIntake {
         }
     }
 
-
+    public boolean isHoldingBlock() {
+        return holdingBlock;
+    }
 }

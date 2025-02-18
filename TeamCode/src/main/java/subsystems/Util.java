@@ -1,6 +1,7 @@
 package subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.localization.Pose;
 
 import java.util.HashMap;
 
@@ -40,5 +41,14 @@ public class Util {
         deviceConf.put("colorSensor", "sensor");
         deviceConf.put("spinner", "spinner");
         deviceConf.put("clamp", "clamp");
+    }
+
+    public double calculateTangentHeading(Pose startPose, Pose endPose) {
+        double diffX = endPose.getX() - startPose.getX();
+        double diffY = endPose.getY() - startPose.getY();
+
+        double angle = Math.atan2(diffY, diffX);
+
+        return angle;
     }
 }
