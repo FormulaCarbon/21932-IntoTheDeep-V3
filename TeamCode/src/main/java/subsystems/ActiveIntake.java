@@ -18,15 +18,15 @@ public class ActiveIntake {
     ColorRangefinder sensor;
     NormalizedRGBA colors, lastColors;
     public static int ledBrightness = 100;
-    public static double clampUp = 0.26, clampDown = 0.4778, spitTime = 0.5;
+    public static double clampUp = 0.26, clampDown = 0.56, spitTime = 0.3;
 
     private double tarPower, tarPos = clampUp;
 
-    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 30;
+    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 40, minThresh = 0.002, redGreenThresh = 0.002;
 
-    private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100;
+    private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100, minDelta, redGreenDelta;
 
-    public static double staticRed = 0.018, staticBlue = 0.028, staticGreen = 0.033, holdPow = 0, outPow = 0.2;
+    public static double staticRed = 0.0635, staticBlue = 0.0773, staticGreen = 0.0976, holdPow = 0, outPow = 0.5;
     private String blockColor = "None";
 
     private boolean holdingBlock = false;
@@ -55,7 +55,10 @@ public class ActiveIntake {
             distance = getDistance();
 
             holdingBlock = distance < distanceThresh;
+            minDelta = Math.max(redDelta, Math.max(greenDelta, blueDelta));
+            redGreenDelta = Math.abs(redDelta - greenDelta);
 
+/*
             if (redDelta > redYellowThresh && greenDelta > greenThresh && holdingBlock) {
                 blockColor = "Yellow";
             } else if (redDelta > redThresh && holdingBlock) {
@@ -63,6 +66,27 @@ public class ActiveIntake {
             } else if (blueDelta > blueThresh && holdingBlock) {
                 blockColor = "Blue";
             } else {
+                blockColor = "None";
+            }*/
+            if (minDelta > minThresh && holdingBlock)
+            {
+                if (redGreenDelta < redGreenThresh && blueDelta != minDelta) {
+                    blockColor = "Yellow";
+                }
+                else if (redDelta == minDelta) {
+                    blockColor = "Red";
+                }
+                else if (blueDelta == minDelta) {
+                    blockColor = "Blue";
+                }
+                else if (greenDelta == minDelta) {
+                    blockColor = "Yellow";
+                }
+                else {
+                    blockColor = "None";
+                }
+            }
+            else {
                 blockColor = "None";
             }
             timer.reset();

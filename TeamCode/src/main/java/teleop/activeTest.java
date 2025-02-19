@@ -60,7 +60,7 @@ public class activeTest extends LinearOpMode {
                 auto = !auto;
             }
 
-            if (auto || spitting)
+            /*if (auto || spitting)
             {
                 intake.intake();
                 if (intake.getBlockColor().equals(avoid) || spitting)
@@ -79,6 +79,22 @@ public class activeTest extends LinearOpMode {
                     auto = false;
                     spitting = false;
                 }
+
+            }*/
+            if (auto) {
+                intake.intake();
+                if (intake.getBlockColor().equals(avoid)) {
+                    intake.unclamp();
+                }
+                else {
+                    intake.clamp();
+                }
+
+                if (!intake.getBlockColor().equals(avoid) && !intake.getBlockColor().equals("None")) {
+                    intake.off();
+                    auto = false;
+                }
+
 
             }
 

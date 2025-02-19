@@ -38,7 +38,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
     ElapsedTime spitTimer = new ElapsedTime();
     boolean auto, spitting;
 
-    String avoid = "Red";
+    public static String avoid = "Red";
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -179,6 +179,18 @@ public class IntoTheDeep_Active extends LinearOpMode {
             if (auto || spitting)
             {
                 intake.intake();
+                if (intake.getBlockColor().equals(avoid)) {
+                    intake.unclamp();
+                }
+                else {
+                    intake.clamp();
+                }
+
+                if (!intake.getBlockColor().equals(avoid) && !intake.getBlockColor().equals("None")) {
+                    intake.off();
+                    auto = false;
+                }
+
                 /*intake.intake();
                 if (intake.getBlockColor().equals(avoid) || spitting)
                 {
