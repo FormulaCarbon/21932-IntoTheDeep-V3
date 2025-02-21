@@ -16,7 +16,7 @@ public class Wrist {
     public static HashMap<String, Double> bicepPositions = new HashMap<String, Double>();
     public static HashMap<String, Double> forearmPositions = new HashMap<String, Double>();
 
-    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.89, fBasket = 0.8, bIdle = 0.75, fIdle = 0.895, bIntake = 0.89, fIntake = 0.47;
+    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.84, fBasket = 0.8, bIdle = 0.75, fIdle = 0.895, bIntake = 0.89, fIntake = 0.47;
 
     public static double[] rotationPositions = new double[5];
 

@@ -30,6 +30,7 @@ public class ActiveIntake {
     private String blockColor = "None";
 
     private boolean holdingBlock = false;
+    public static boolean auto = false;
 
     ElapsedTime timer = new ElapsedTime(), spitTimer = new ElapsedTime();
 
@@ -158,6 +159,25 @@ public class ActiveIntake {
         else {
             intake();
         }
+    }
+
+    public void auto(String avoid) {
+        if (auto) {
+            if (blockColor.equals("None") || blockColor.equals(avoid)) {
+                intake();
+            } else {
+                off();
+                clamp();
+            }
+
+            if (blockColor.equals(avoid)) {
+                unclamp();
+            }
+        }
+    }
+
+    public void setAuto(boolean n) {
+        auto = n;
     }
 
     public boolean isHoldingBlock() {

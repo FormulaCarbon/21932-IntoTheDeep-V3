@@ -14,15 +14,23 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import subsystems.ActiveIntake;
+import subsystems.Extension;
 import subsystems.Pivot;
 import subsystems.SpecMec;
 import subsystems.Util;
+import subsystems.Wrist;
 
 @Config
 @Autonomous
 public class Sample_Auton_6 extends OpMode {
     private Follower follower;
-    private Util util = new Util();
+    Util util = new Util();
+
+    Pivot pivot;
+    Extension extension;
+    Wrist wrist;
+    ActiveIntake intake;
 
     public static double preloadBasketX = 14, preloadBasketY = 130, basket330X = 15, basket330Y = 132, block1X = 32, block1Y = 124, block2X = 32, block2Y = 132, block3X = 36, block3Y = 132, controlX = 57, controlY = 125, subX = 66, subY = 96;
 
@@ -63,6 +71,12 @@ public class Sample_Auton_6 extends OpMode {
     private double angle2 = util.calculateTangentHeading(basket330Pose, block2Pose);
 
     public static double finishTurn1 = 0.5, finishTurn2 = 0.5, finishTurn3 = 0.5, finishTurnSub = 0.5, finishTurnScore = 0.5;
+    public static double preloadExtensionPar = 0.1, b0WristBackPar = 0.9, b0ScorePar = 0.91, b0RetractPar = 0.2, b0PivotDownPar = 0;
+    public static double b1ExtensionPar = 0.1, b1WristBackPar = 0.9, b1ScorePar = 0.91, b1RetractPar = 0.2, b1PivotDownPar = 0;
+    public static double b2ExtensionPar = 0.1, b2WristBackPar = 0.9, b2ScorePar = 0.91,b2RetractPar = 0.2, b2PivotDownPar = 0;
+    public static double b3ExtensionPar = 0.1, b3WristBackPar = 0.9, b3ScorePar = 0.91,b3RetractPar = 0.2, b3PivotDownPar = 0;
+
+    public static double maxPow1 = 0.5;
 
     public void buildPaths() {
         scorePreload = follower.pathBuilder()
@@ -74,6 +88,11 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(startPose.getHeading(), preloadBasketPose.getHeading())
+                .addParametricCallback(0, () -> pivot.setPos("Basket"))
+                .addParametricCallback(preloadExtensionPar, () -> extension.setPos("Basket"))
+                .addParametricCallback(b0WristBackPar, () -> wrist.setPos("Basket"))
+                .addParametricCallback(b0ScorePar, () -> intake.setAuto(false))
+                .addParametricCallback(b0ScorePar, () -> intake.outtake())
                 .build();
 
         getBlock1 = follower.pathBuilder()
@@ -84,6 +103,10 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(preloadBasketPose.getHeading(), angle1, finishTurn1)
+                .addParametricCallback(b0RetractPar, () -> extension.setPos("Idle"))
+                .addParametricCallback(0, () -> wrist.setPos("Intake"))
+                .addParametricCallback(b0PivotDownPar, () -> pivot.setPos("Down"))
+                .addParametricCallback(0.5, () -> intake.setAuto(true))
                 .build();
 
         scoreBlock1 = follower.pathBuilder()
@@ -94,6 +117,11 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(angle1, basket330Pose.getHeading())
+                .addParametricCallback(0, () -> pivot.setPos("Basket"))
+                .addParametricCallback(b1ExtensionPar, () -> extension.setPos("Basket"))
+                .addParametricCallback(b1WristBackPar, () -> wrist.setPos("Basket"))
+                .addParametricCallback(b1ScorePar, () -> intake.setAuto(false))
+                .addParametricCallback(b1ScorePar, () -> intake.outtake())
                 .build();
 
         getBlock2 = follower.pathBuilder()
@@ -104,6 +132,10 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(basket330Pose.getHeading(), angle2, finishTurn2)
+                .addParametricCallback(b1RetractPar, () -> extension.setPos("Idle"))
+                .addParametricCallback(0, () -> wrist.setPos("Intake"))
+                .addParametricCallback(b1PivotDownPar, () -> pivot.setPos("Down"))
+                .addParametricCallback(0.5, () -> intake.setAuto(true))
                 .build();
 
         scoreBlock2 = follower.pathBuilder()
@@ -114,6 +146,11 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(angle2, basket330Pose.getHeading())
+                .addParametricCallback(0, () -> pivot.setPos("Basket"))
+                .addParametricCallback(b2ExtensionPar, () -> extension.setPos("Basket"))
+                .addParametricCallback(b2WristBackPar, () -> wrist.setPos("Basket"))
+                .addParametricCallback(b2ScorePar, () -> intake.setAuto(false))
+                .addParametricCallback(b2ScorePar, () -> intake.outtake())
                 .build();
 
         getBlock3 = follower.pathBuilder()
@@ -125,6 +162,10 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(basket330Pose.getHeading(), block3Pose.getHeading(), finishTurn3)
+                .addParametricCallback(b2RetractPar, () -> extension.setPos("Idle"))
+                .addParametricCallback(0, () -> wrist.setPos("Intake"))
+                .addParametricCallback(b2PivotDownPar, () -> pivot.setPos("Down"))
+                .addParametricCallback(0.5, () -> intake.setAuto(true))
                 .build();
 
         scoreBlock3 = follower.pathBuilder()
@@ -135,6 +176,11 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(block3Pose.getHeading(), preloadBasketPose.getHeading())
+                .addParametricCallback(0, () -> pivot.setPos("Basket"))
+                .addParametricCallback(b3ExtensionPar, () -> extension.setPos("Basket"))
+                .addParametricCallback(b3WristBackPar, () -> wrist.setPos("Basket"))
+                .addParametricCallback(b3ScorePar, () -> intake.setAuto(false))
+                .addParametricCallback(b3ScorePar, () -> intake.outtake())
                 .build();
 
         getSubBlock = follower.pathBuilder()
@@ -146,6 +192,10 @@ public class Sample_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(preloadBasketPose.getHeading(), subPickupPose.getHeading(), finishTurnSub)
+                .addParametricCallback(b3RetractPar, () -> extension.setPos("Idle"))
+                .addParametricCallback(b3PivotDownPar, () -> pivot.setPos("Down"))
+                .addParametricCallback(0.5, () -> intake.setAuto(true))
+
                 .build();
 
         scoreSubBlock = follower.pathBuilder()
@@ -173,47 +223,55 @@ public class Sample_Auton_6 extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                follower.setMaxPower(1);
                 follower.followPath(scorePreload);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(maxPow1);
                     follower.followPath(getBlock1, true);
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1);
                     follower.followPath(scoreBlock1, true);
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(maxPow1);
                     follower.followPath(getBlock2, true);
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1);
                     follower.followPath(scoreBlock2, true);
                     setPathState(5);
                 }
                 break;
             case 5:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(maxPow1);
                     follower.followPath(getBlock3, true);
                     setPathState(6);
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1);
                     follower.followPath(scoreBlock3, true);
                     setPathState(7);
                 }
                 break;
             case 7:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1);
                     follower.followPath(getSubBlock, true);
                     setPathState(8);
                 }
@@ -258,29 +316,45 @@ public class Sample_Auton_6 extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
+        pivot = new Pivot(hardwareMap, util.deviceConf);
+        extension = new Extension(hardwareMap, util.deviceConf);
+        wrist = new Wrist(hardwareMap, util.deviceConf);
+        intake = new ActiveIntake(hardwareMap, util.deviceConf);
         Constants.setConstants(FConstants.class, LConstants.class);
         follower = new Follower(hardwareMap);
         follower.setStartingPose(startPose);
+        pivot.setPos("Start");
+        wrist.setPos("Start");
         buildPaths();
     }
 
     @Override
     public void loop() {
         follower.update();
+        pivot.update();
+        wrist.update();
+        extension.update();
+        intake.update();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
         telemetry.addData("Position", follower.getPose().toString());
+        telemetry.addData("eror", pivot.getError());
         telemetry.update();
         follower.drawOnDashBoard();
+        intake.auto("Red");
     }
 
     @Override
     public void start() {
         setPathState(0);
+        pivot.setPos("Basket");
+        wrist.setPos("Idle");
     }
 
     @Override
     public void init_loop() {
+        pivot.update();
+        wrist.update();
     }
     
 
