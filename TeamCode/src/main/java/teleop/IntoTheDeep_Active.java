@@ -40,6 +40,8 @@ public class IntoTheDeep_Active extends LinearOpMode {
 
     public static String avoid = "Red";
 
+    private boolean avoidYellow = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
         Util util = new Util();
@@ -134,18 +136,6 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 turnReady = false;
             }
 
-            if (gamepad1.b && pivotReady && extensionReady && wristReady) {
-                incr = -1;
-            }
-
-            if (gamepad1.y && extensionReady) {
-                incr = -2;
-            }
-
-            if (gamepad1.x && extensionReady) {
-                incr = -3;
-            }
-
             if (gamepad2.dpad_down && extensionReady) {
                 extension.setDirectPos(extension.getCurrentPos() - 50);
                 extensionManual = true;
@@ -176,6 +166,17 @@ public class IntoTheDeep_Active extends LinearOpMode {
 
             }
 
+            if (gamepad2.dpad_up) {
+                avoidYellow = !avoidYellow;
+            }
+
+            if (gamepad2.dpad_right) {
+                avoid = "Red";
+            }
+
+            if (gamepad2.dpad_left) {
+                avoid = "Blue";
+            }
             if (auto || spitting)
             {
                 intake.intake();
@@ -377,7 +378,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 case 7: // High Basket
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
-                    if (pivot.getCurrent() > 2090) {
+                    if (pivot.getCurrent() > 1990) {
                         extension.setPos("Basket");
                     }
                     wrist.setBicepPos("Basket");

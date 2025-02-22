@@ -25,8 +25,8 @@ public class ActiveIntake {
     public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 40, minThresh = 0.002, redGreenThresh = 0.002;
 
     private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100, minDelta, redGreenDelta;
+    public static double staticRed = 0.054, staticBlue = 0.063, staticGreen = 0.084, holdPow = 0, outPow = 0.35;
 
-    public static double staticRed = 0.0635, staticBlue = 0.0773, staticGreen = 0.0976, holdPow = 0, outPow = 0.5;
     private String blockColor = "None";
 
     private boolean holdingBlock = false;
@@ -182,5 +182,10 @@ public class ActiveIntake {
 
     public boolean isHoldingBlock() {
         return holdingBlock;
+    }
+
+    public void simpleUpdate() {
+        spin.setPower(tarPower);
+        clamp.setPosition(tarPos);
     }
 }

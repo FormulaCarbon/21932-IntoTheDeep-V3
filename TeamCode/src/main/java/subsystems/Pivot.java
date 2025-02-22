@@ -26,7 +26,7 @@ public class Pivot {
     private int lta = 0;
 
 
-    public static int basketPos = 2100, hangPos = 2100;
+    public static int basketPos = 2000, hangPos = 2100;
 
     public static double kP = 0.0029, kI = 0, kD = 0.0001, k = 0, extendedKp = 0.003, zeroKp = 0.005, slowKp = 0.02, tol = 0.001;
     

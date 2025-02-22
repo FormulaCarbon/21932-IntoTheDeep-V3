@@ -32,7 +32,7 @@ public class Sample_Auton_6 extends OpMode {
     Wrist wrist;
     ActiveIntake intake;
 
-    public static double preloadBasketX = 14, preloadBasketY = 130, basket330X = 15, basket330Y = 132, block1X = 32, block1Y = 124, block2X = 32, block2Y = 132, block3X = 36, block3Y = 132, controlX = 57, controlY = 125, subX = 66, subY = 96;
+    public static double preloadBasketX = 17, preloadBasketY = 126, basket330X = 18, basket330Y = 130, block1X = 32, block1Y = 124, block2X = 32, block2Y = 132, block3X = 36, block3Y = 132, controlX = 57, controlY = 125, subX = 66, subY = 96;
 
     private Timer pathTimer, actionTimer, opmodeTimer;
 
@@ -71,12 +71,14 @@ public class Sample_Auton_6 extends OpMode {
     private double angle2 = util.calculateTangentHeading(basket330Pose, block2Pose);
 
     public static double finishTurn1 = 0.5, finishTurn2 = 0.5, finishTurn3 = 0.5, finishTurnSub = 0.5, finishTurnScore = 0.5;
-    public static double preloadExtensionPar = 0.1, b0WristBackPar = 0.9, b0ScorePar = 0.91, b0RetractPar = 0.2, b0PivotDownPar = 0;
-    public static double b1ExtensionPar = 0.1, b1WristBackPar = 0.9, b1ScorePar = 0.91, b1RetractPar = 0.2, b1PivotDownPar = 0;
-    public static double b2ExtensionPar = 0.1, b2WristBackPar = 0.9, b2ScorePar = 0.91,b2RetractPar = 0.2, b2PivotDownPar = 0;
-    public static double b3ExtensionPar = 0.1, b3WristBackPar = 0.9, b3ScorePar = 0.91,b3RetractPar = 0.2, b3PivotDownPar = 0;
+    public static double preloadExtensionPar = 0.1, b0WristBackPar = 0.7, b0ScorePar = 0, b0RetractPar = 0, b0PivotDownPar = 0.18;
+    public static double b1ExtensionPar = 0.5, b1WristBackPar = 0.7, b1ScorePar = 0, b1RetractPar = 0, b1PivotDownPar = 0.18;
+    public static double b2ExtensionPar = 0.5, b2WristBackPar = 0.7, b2ScorePar = 0,b2RetractPar = 0, b2PivotDownPar = 0.18;
+    public static double b3ExtensionPar = 0.5, b3WristBackPar = 0.7, b3ScorePar = 0,b3RetractPar = 0, b3PivotDownPar = 0.18;
 
-    public static double maxPow1 = 0.5;
+    public static double maxPow1 = 0.35;
+
+    public static double scoreTime = 0.5, preloadScoreTime = 2.5, slowZpam = 2, normalZpam = 4.2, maxPow2 = 0.35, b1ScoreTime = 6, b2ScoreTime = 6, b3ScoreTime = 6;
 
     public void buildPaths() {
         scorePreload = follower.pathBuilder()
@@ -91,8 +93,8 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(0, () -> pivot.setPos("Basket"))
                 .addParametricCallback(preloadExtensionPar, () -> extension.setPos("Basket"))
                 .addParametricCallback(b0WristBackPar, () -> wrist.setPos("Basket"))
-                .addParametricCallback(b0ScorePar, () -> intake.setAuto(false))
-                .addParametricCallback(b0ScorePar, () -> intake.outtake())
+                .setZeroPowerAccelerationMultiplier(slowZpam)
+               // .addParametricCallback(b0ScorePar, () -> intake.outtake())
                 .build();
 
         getBlock1 = follower.pathBuilder()
@@ -106,7 +108,8 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(b0RetractPar, () -> extension.setPos("Idle"))
                 .addParametricCallback(0, () -> wrist.setPos("Intake"))
                 .addParametricCallback(b0PivotDownPar, () -> pivot.setPos("Down"))
-                .addParametricCallback(0.5, () -> intake.setAuto(true))
+                .addParametricCallback(0.5, () -> intake.intake())
+                .setZeroPowerAccelerationMultiplier(normalZpam)
                 .build();
 
         scoreBlock1 = follower.pathBuilder()
@@ -120,8 +123,9 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(0, () -> pivot.setPos("Basket"))
                 .addParametricCallback(b1ExtensionPar, () -> extension.setPos("Basket"))
                 .addParametricCallback(b1WristBackPar, () -> wrist.setPos("Basket"))
-                .addParametricCallback(b1ScorePar, () -> intake.setAuto(false))
-                .addParametricCallback(b1ScorePar, () -> intake.outtake())
+                //.addParametricCallback(b1ScorePar, () -> intake.off())
+                //.addParametricCallback(b1ScorePar, () -> intake.outtake())
+                .setZeroPowerAccelerationMultiplier(slowZpam)
                 .build();
 
         getBlock2 = follower.pathBuilder()
@@ -135,7 +139,8 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(b1RetractPar, () -> extension.setPos("Idle"))
                 .addParametricCallback(0, () -> wrist.setPos("Intake"))
                 .addParametricCallback(b1PivotDownPar, () -> pivot.setPos("Down"))
-                .addParametricCallback(0.5, () -> intake.setAuto(true))
+                .addParametricCallback(0.5, () -> intake.intake())
+                .setZeroPowerAccelerationMultiplier(normalZpam)
                 .build();
 
         scoreBlock2 = follower.pathBuilder()
@@ -149,8 +154,9 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(0, () -> pivot.setPos("Basket"))
                 .addParametricCallback(b2ExtensionPar, () -> extension.setPos("Basket"))
                 .addParametricCallback(b2WristBackPar, () -> wrist.setPos("Basket"))
-                .addParametricCallback(b2ScorePar, () -> intake.setAuto(false))
-                .addParametricCallback(b2ScorePar, () -> intake.outtake())
+                .addParametricCallback(b2ScorePar, () -> intake.off())
+                .setZeroPowerAccelerationMultiplier(slowZpam)
+               // .addParametricCallback(b2ScorePar, () -> intake.outtake())
                 .build();
 
         getBlock3 = follower.pathBuilder()
@@ -165,7 +171,8 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(b2RetractPar, () -> extension.setPos("Idle"))
                 .addParametricCallback(0, () -> wrist.setPos("Intake"))
                 .addParametricCallback(b2PivotDownPar, () -> pivot.setPos("Down"))
-                .addParametricCallback(0.5, () -> intake.setAuto(true))
+                .addParametricCallback(0.5, () -> intake.intake())
+                .setZeroPowerAccelerationMultiplier(normalZpam)
                 .build();
 
         scoreBlock3 = follower.pathBuilder()
@@ -179,8 +186,9 @@ public class Sample_Auton_6 extends OpMode {
                 .addParametricCallback(0, () -> pivot.setPos("Basket"))
                 .addParametricCallback(b3ExtensionPar, () -> extension.setPos("Basket"))
                 .addParametricCallback(b3WristBackPar, () -> wrist.setPos("Basket"))
-                .addParametricCallback(b3ScorePar, () -> intake.setAuto(false))
-                .addParametricCallback(b3ScorePar, () -> intake.outtake())
+                .addParametricCallback(b3ScorePar, () -> intake.off())
+                //.addParametricCallback(b3ScorePar, () -> intake.outtake())
+                .setZeroPowerAccelerationMultiplier(slowZpam)
                 .build();
 
         getSubBlock = follower.pathBuilder()
@@ -194,7 +202,6 @@ public class Sample_Auton_6 extends OpMode {
                 .setLinearHeadingInterpolation(preloadBasketPose.getHeading(), subPickupPose.getHeading(), finishTurnSub)
                 .addParametricCallback(b3RetractPar, () -> extension.setPos("Idle"))
                 .addParametricCallback(b3PivotDownPar, () -> pivot.setPos("Down"))
-                .addParametricCallback(0.5, () -> intake.setAuto(true))
 
                 .build();
 
@@ -225,19 +232,37 @@ public class Sample_Auton_6 extends OpMode {
             case 0:
                 follower.setMaxPower(1);
                 follower.followPath(scorePreload);
-                setPathState(1);
+                if (pathTimer.getElapsedTimeSeconds() > preloadScoreTime)
+                {
+                    intake.outtake();
+                }
+                if (pathTimer.getElapsedTimeSeconds() > preloadScoreTime + scoreTime)
+                {
+                    setPathState(1);
+                }
+
+
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(maxPow1);
+                    follower.setMaxPower(maxPow2);
                     follower.followPath(getBlock1, true);
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
+                    intake.off();
                     follower.setMaxPower(1);
                     follower.followPath(scoreBlock1, true);
+
+                }
+                if (pathTimer.getElapsedTimeSeconds() > b1ScoreTime)
+                {
+                    intake.outtake();
+                }
+                if (pathTimer.getElapsedTimeSeconds() > b1ScoreTime + scoreTime)
+                {
                     setPathState(3);
                 }
                 break;
@@ -251,7 +276,14 @@ public class Sample_Auton_6 extends OpMode {
             case 4:
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1);
-                    follower.followPath(scoreBlock2, true);
+                    follower.followPath(scoreBlock2, true);}
+
+                if (pathTimer.getElapsedTimeSeconds() > b2ScoreTime)
+                {
+                    intake.outtake();
+                }
+                if (pathTimer.getElapsedTimeSeconds() > b2ScoreTime + scoreTime)
+                {
                     setPathState(5);
                 }
                 break;
@@ -266,6 +298,14 @@ public class Sample_Auton_6 extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1);
                     follower.followPath(scoreBlock3, true);
+                }
+
+                if (pathTimer.getElapsedTimeSeconds() > b3ScoreTime)
+                {
+                    intake.outtake();
+                }
+                if (pathTimer.getElapsedTimeSeconds() > b3ScoreTime + scoreTime)
+                {
                     setPathState(7);
                 }
                 break;
@@ -325,6 +365,7 @@ public class Sample_Auton_6 extends OpMode {
         follower.setStartingPose(startPose);
         pivot.setPos("Start");
         wrist.setPos("Start");
+        intake.clamp();
         buildPaths();
     }
 
@@ -334,14 +375,14 @@ public class Sample_Auton_6 extends OpMode {
         pivot.update();
         wrist.update();
         extension.update();
-        intake.update();
+        intake.simpleUpdate();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
         telemetry.addData("Position", follower.getPose().toString());
         telemetry.addData("eror", pivot.getError());
+        telemetry.addData("pathtimer", pathTimer.getElapsedTimeSeconds());
         telemetry.update();
         follower.drawOnDashBoard();
-        intake.auto("Red");
     }
 
     @Override
@@ -349,12 +390,15 @@ public class Sample_Auton_6 extends OpMode {
         setPathState(0);
         pivot.setPos("Basket");
         wrist.setPos("Idle");
+        intake.clamp();
+        intake.off();
     }
 
     @Override
     public void init_loop() {
         pivot.update();
         wrist.update();
+        intake.update();
     }
     
 
