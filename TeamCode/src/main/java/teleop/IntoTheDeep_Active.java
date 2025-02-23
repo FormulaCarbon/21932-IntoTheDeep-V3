@@ -36,7 +36,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
     public static int pchange2 = 2000;
 
     ElapsedTime spitTimer = new ElapsedTime();
-    boolean auto, spitting;
+    boolean auto, spitting, disableSensor = false, intaking = false;
 
     public static String avoid = "Red";
 
@@ -68,36 +68,6 @@ public class IntoTheDeep_Active extends LinearOpMode {
 
             increment(gamepad1.right_bumper, gamepad1.left_bumper, sequence);
             setPositions(incr, sequence, pivot, extension, wrist, specMec, intake, pivotManual, extensionManual);
-
-            /*if (gamepad1.x && wristReady) {
-                wristManual = true;
-                wrist.setBicepPos("Intake");
-                wrist.setForearmPos("Intake");
-                wristReady = false;
-            }
-            else if (gamepad1.y && wristReady) {
-                wristManual = true;
-                wrist.setBicepPos("Basket");
-                wrist.setForearmPos("Basket");
-                wristReady = false;
-            }*/
-
-            /*if (gamepad2.dpad_up && turnReady) {
-                wrist.setRotationPos(0);
-                turnReady = false;
-            }
-            else if (gamepad2.dpad_left && turnReady) {
-                wrist.setRotationPos(3);
-                turnReady = false;
-            }
-            else if (gamepad2.dpad_down && turnReady) {
-                wrist.setRotationPos(2);
-                turnReady = false;
-            }
-            else if (gamepad2.dpad_right && turnReady) {
-                wrist.setRotationPos(1);
-                turnReady = false;
-            }*/
 
             if (gamepad2.right_bumper) {
                 sequence = "Specimen";
@@ -136,7 +106,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 turnReady = false;
             }
 
-            if (gamepad2.dpad_down && extensionReady) {
+            if (gamepad2.y && extensionReady) {
                 extension.setDirectPos(extension.getCurrentPos() - 50);
                 extensionManual = true;
                 extensionReady = false;
@@ -147,17 +117,11 @@ public class IntoTheDeep_Active extends LinearOpMode {
                 drive.slowModeOn();
             }
 
-            if ((gamepad1.left_trigger < 0.1) && !gamepad2.y) {
+            if ((gamepad1.left_trigger < 0.1)) {
                 drive.slowModeOf();
             }
 
-            if (gamepad2.y) {
-                drive.slowModeOn();
-            }
 
-            if (gamepad2.x) {
-                drive.slowModeOf();
-            }
 
             if (gamepad2.right_bumper || gamepad2.left_bumper || gamepad1.right_bumper || gamepad1.left_bumper)
             {
@@ -177,54 +141,48 @@ public class IntoTheDeep_Active extends LinearOpMode {
             if (gamepad2.dpad_left) {
                 avoid = "Blue";
             }
-            if (auto || spitting)
+
+            if (gamepad2.dpad_down) {
+                disableSensor = !disableSensor;
+            }
+
+            if (!disableSensor && (auto || spitting))
             {
                 intake.intake();
-                if (intake.getBlockColor().equals(avoid)) {
+                if (intake.getBlockColor().equals(avoid) || (avoidYellow && intake.getBlockColor().equals("Yellow"))) {
                     intake.unclamp();
                 }
                 else {
                     intake.clamp();
                 }
 
-                if (!intake.getBlockColor().equals(avoid) && !intake.getBlockColor().equals("None")) {
+                if (!intake.getBlockColor().equals(avoid) && !intake.getBlockColor().equals("None") && !(avoidYellow && intake.getBlockColor().equals("Yellow"))) {
                     intake.off();
                     auto = false;
                 }
 
-                /*intake.intake();
-                if (intake.getBlockColor().equals(avoid) || spitting)
-                {
-                    if (!spitting)
-                    {
-                        spitTimer.reset();
-                        spitting = true;
-                    }
-                    intake.spit(spitTimer.seconds());
-                    auto = false;
-                    if (spitTimer.seconds() > ActiveIntake.spitTime)
-                    {
-                        spitting = false;
-                    }
 
-                }
-                else if (!intake.getBlockColor().equals("None")) {
-                    intake.hold();
-                    auto = false;
-                    spitting = false;
-                }
-                else {
-                    auto = true;
-                }*/
 
             }
+
 
             if(gamepad1.a) {
                 intake.outtake();
             }
-            else if (!auto) {
+            if(gamepad1.y) {
+                intaking = !intaking;
+            }
+
+            if (intaking) {
+                intake.intake();
+            }
+            else if (gamepad1.a) {
+                intake.outtake();
+            }
+            else if (!auto){
                 intake.off();
             }
+
 
 
             drive.update();
@@ -238,6 +196,11 @@ public class IntoTheDeep_Active extends LinearOpMode {
 
             telemetry.addData("incr", incr);
             telemetry.addData("seq", sequence);
+            telemetry.addData("sensor disabled", disableSensor);
+            telemetry.addData("block", intake.getBlockColor());
+            telemetry.addData("avoid", avoid);
+            telemetry.addData("yellowavoid", avoidYellow);
+            telemetry.addData("auto", auto);
             telemetry.addData("tar", pivot.getTarget());
             telemetry.addData("cur", pivot.getCurrent());
             telemetry.addData("pow", pivot.getPower());
@@ -245,8 +208,8 @@ public class IntoTheDeep_Active extends LinearOpMode {
             telemetry.addData("vel", pivot.getVelocity());
             telemetry.addData("extension vel", extension.getVelocity());
             telemetry.addData("error", extension.getError());
-            telemetry.addData("block", intake.getBlockColor());
-            telemetry.addData("auto", auto);
+
+
 
 
             telemetry.update();
@@ -324,7 +287,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     wrist.setBicepPos("Idle");
                     wrist.setForearmPos("Idle");
                     auto = false;
-
+                    intaking = false;
                     break;
                 case 2: // Sample Extend
                     pivot.setPos("Down");
@@ -359,6 +322,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     wrist.setBicepPos("Idle");
                     wrist.setForearmPos("Idle");
                     auto = false;
+                    intaking = false;
                     break;
                 case 5: // Pullout
                     pivot.setPos("Down");
@@ -420,6 +384,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     specMec.setPosition("Intake", "Intake");
                     specMec.openClaw();
                     auto = false;
+                    intaking = false;
                     break;
                 case 1:
                     specMec.setPosition("Intake", "Intake");
@@ -455,6 +420,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     wrist.setBicepPos("Idle");
                     wrist.setForearmPos("Idle");
                     auto = false;
+                    intaking = false;
 
                     break;
                 case 1: // Sample Extend
@@ -490,6 +456,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     wrist.setBicepPos("Idle");
                     wrist.setForearmPos("Idle");
                     auto = false;
+                    intaking = false;
                     break;
                 /*case 4: // Pullout
                     pivot.setPos("Down");

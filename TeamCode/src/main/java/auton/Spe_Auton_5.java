@@ -17,6 +17,7 @@ import pedroPathing.constants.LConstants;
 import subsystems.Pivot;
 import subsystems.SpecMec;
 import subsystems.Util;
+import subsystems.Wrist;
 
 @Config
 @Autonomous
@@ -28,11 +29,13 @@ public class Spe_Auton_5 extends OpMode {
     private Pivot pivot;
     private SpecMec specMec;
 
-    public static double hangX = 40, pickX = 13, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 8, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 20, parkY = 66;
+    private Wrist wrist;
 
-    public static int pivotDownTime = 0, idleTime0 = 0, scoreTime0 = 800, openTime0 = 900, pullOutTime = 1000, closeTime1 = 500, idleTime = 1000, scoreTime = 1100, openTime = 1200, specMecDownTime = 500, closeTime = 1000, specMecParkTime = 500;
+    public static double hangX = 39, pickX = 13.5, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 10, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 35, parkY = 66, pickX4 = 13.5, pickX3 = 14.5, hang3XChange = -8, hang4XChange = -10;
 
-    public static double pullOutPar = 0.5, idlePar = 0.2, scorePar = 0.9, openPar = 0.92, closePar = 0.92, specMecDownPar = 0.2, scorePar4 = 0.92, openPar4 = 0.94;
+    public static int pivotDownTime = 0, idleTime0 = 0, scoreTime0 = 100, openTime0 = 900 , pullOutTime = 1000, closeTime1 = 500, idleTime = 1000, scoreTime = 1200, openTime = 1400, specMecDownTime = 500, closeTime = 1000, specMecParkTime = 100;
+
+    public static double pullOutPar = 0.5, idlePar = 0.1, scorePar = 0.91, openPar = 0.93, closePar = 0.9, specMecDownPar = 0.2, specMecParkPar = 0.1, scorePar4 = 0.94, openPar4 = 0.96, scorePar3 = 0.92, openPar3 = 0.95;
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
     private int pathState;
@@ -58,15 +61,21 @@ public class Spe_Auton_5 extends OpMode {
 
     private final Pose pickupPose = new Pose(pickX, pickY, Math.toRadians(0));
 
+    private final Pose pickupPose3 = new Pose(pickX3, pickY, Math.toRadians(0));
+    private final Pose pickupPose4 = new Pose(pickX4, pickY, Math.toRadians(0));
+
     private final Pose hang1Pose = new Pose(hangX, hangY-2, Math.toRadians(0));
     private final Pose hang2Pose = new Pose(hangX, hangY-4, Math.toRadians(0));
-    private final Pose hang3Pose = new Pose(hangX, hangY-6, Math.toRadians(0));
-    private final Pose hang4Pose = new Pose(hangX, hangY-8, Math.toRadians(0));
+    private final Pose hang3Pose = new Pose(hangX, hangY+hang3XChange, Math.toRadians(0));
+    private final Pose hang4Pose = new Pose(hangX, hangY+hang4XChange, Math.toRadians(0));
 
     private final Pose parkPose = new Pose(parkX-15, parkY, Math.toRadians(0));
 
     private final Pose hangControl1 = new Pose(30.592692828146145, 31.7618403247632, Math.toRadians(0));
     private final Pose hangControl2 = new Pose(22.99323410013532, 74.8254397834912, Math.toRadians(0));
+    private final Pose hangControl23 = new Pose(22.99323410013532, 74.8254397834912 + hang3XChange, Math.toRadians(0));
+    private final Pose hangControl24 = new Pose(22.99323410013532, 74.8254397834912 + hang4XChange, Math.toRadians(0));
+
 
     private PathChain hangPreload, pushBlocks, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, park;
 
@@ -184,7 +193,7 @@ public class Spe_Auton_5 extends OpMode {
                                 new Point(hang3Pose),
                                 new Point(hangControl2),
                                 new Point(hangControl1),
-                                new Point(pickupPose)
+                                new Point(pickupPose3)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -195,16 +204,16 @@ public class Spe_Auton_5 extends OpMode {
         hang3 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Point(pickupPose),
+                                new Point(pickupPose3),
                                 new Point(hangControl1),
-                                new Point(hangControl2),
+                                new Point(hangControl23),
                                 new Point(hang3Pose)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
-                .addParametricCallback(scorePar, () -> specMec.setPosition("Score", "Score"))
-                .addParametricCallback(openPar, () -> specMec.openClaw())
+                .addParametricCallback(scorePar3, () -> specMec.setPosition("Score", "Score"))
+                .addParametricCallback(openPar3, () -> specMec.openClaw())
                 .build();
 
         pick4 = follower.pathBuilder()
@@ -213,7 +222,7 @@ public class Spe_Auton_5 extends OpMode {
                                 new Point(hang3Pose),
                                 new Point(hangControl2),
                                 new Point(hangControl1),
-                                new Point(pickupPose)
+                                new Point(pickupPose4)
                         )
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
@@ -224,9 +233,9 @@ public class Spe_Auton_5 extends OpMode {
         hang4 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                new Point(pickupPose),
+                                new Point(pickupPose4),
                                 new Point(hangControl1),
-                                new Point(hangControl2),
+                                new Point(hangControl24),
                                 new Point(hang4Pose)
                         )
                 )
@@ -245,8 +254,8 @@ public class Spe_Auton_5 extends OpMode {
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .addTemporalCallback(pivotDownTime, () -> pivot.setPos("Down"))
-                .addTemporalCallback(specMecParkTime, () -> specMec.setPosition("Intake", "Intake"))
-                .addTemporalCallback(specMecParkTime, () -> specMec.closeClaw())
+                .addParametricCallback(specMecParkPar, () -> specMec.setPosition("Intake", "Intake"))
+                .addParametricCallback(specMecParkPar, () -> specMec.closeClaw())
                 .build();
     }
 
@@ -333,8 +342,10 @@ public class Spe_Auton_5 extends OpMode {
     public void init() {
         pivot = new Pivot(hardwareMap, util.deviceConf);
         specMec = new SpecMec(hardwareMap, util.deviceConf);
+        wrist = new Wrist(hardwareMap, util.deviceConf);
         pathTimer = new Timer();
         pivot.setPos("Start");
+        wrist.setPos("Start");
         specMec.setPosition("Start", "Start");
         specMec.closeClaw();
         Constants.setConstants(FConstants.class, LConstants.class);
@@ -349,6 +360,7 @@ public class Spe_Auton_5 extends OpMode {
         pivot.update();
         specMec.update();
         specMec.updateClaw();
+        wrist.update();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
         telemetry.addData("Position", follower.getPose().toString());
@@ -360,12 +372,14 @@ public class Spe_Auton_5 extends OpMode {
 
     @Override
     public void start() {
+        wrist.setPos("Start");
         pivot.setPos("Basket");
         setPathState(0);
     }
 
     @Override
     public void init_loop() {
+        wrist.update();
         pivot.update();
         specMec.update();
         specMec.updateClaw();
