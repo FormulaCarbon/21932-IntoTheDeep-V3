@@ -291,8 +291,9 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     if (!eMan) {
                         extension.setPos("Idle");
                     }
-                    wrist.setBicepPos("Idle");
+                    wrist.setBicepPos("Basket");
                     wrist.setForearmPos("Idle");
+                    wrist.setRotationPos(0);
                     break;
                 case 1: // Sample Intake: Down, Unextended
                     //if (extension.getCurrentPos() < 100) {
@@ -301,7 +302,8 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     //}
                     extension.setPos("Idle");
                     wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Idle");
+                    wrist.setForearmPos("Intake");
+                    wrist.setRotationPos(0);
                     auto = false;
                     intaking = false;
                     break;
@@ -310,13 +312,14 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     pivot.setkP("Extended");
                     extension.setPos("Intake");
                     wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Idle");
+                    wrist.setForearmPos("Intake");
                     if (!intake.getBlockColor().equals("None")) {
                         intake.hold();
                     }
                     else {
                         auto = true;
                     }
+                    wrist.setRotationPos(0);
                     break;
                 case 3: // Flip Down
                     pivot.setPos("Down");
@@ -330,22 +333,24 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     else {
                         auto = true;
                     }
+                    wrist.setRotationPos(0);
                     break;
                 case 4: // Flip Up
                     pivot.setPos("Down");
                     pivot.setkP("Extended");
                     extension.setPos("Intake");
                     wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Idle");
+                    wrist.setForearmPos("Intake");
                     auto = false;
                     intaking = false;
+                    wrist.setRotationPos(0);
                     break;
                 case 5: // Pullout
                     pivot.setPos("Down");
                     pivot.setkP("Normal");
                     extension.setPos("Idle");
                     wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Idle");
+                    wrist.setForearmPos("Intake");
                     wrist.setRotationPos(0);
                     break;
                 case 6: // Idle
@@ -353,7 +358,8 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     pivot.setkP("Normal");
                     extension.setPos("Idle");
                     wrist.setBicepPos("Basket");
-                    wrist.setForearmPos("Basket");
+                    wrist.setForearmPos("Idle");
+                    wrist.setRotationPos(0);
                     break;
                 case 7: // High Basket
                     pivot.setPos("Basket");
@@ -364,6 +370,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     if (extension.getCurrentPos() > 1000) {
                         wrist.setBicepPos("Basket");
                         wrist.setForearmPos("Basket");
+                        wrist.setRotationPos(2);
                     }
                     break;
                 case 8:
@@ -372,6 +379,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     extension.setPos("Basket");
                     wrist.setBicepPos("Basket");
                     wrist.setForearmPos("Basket");
+                    wrist.setRotationPos(2);
                     intake.unclamp();
                     intake.outtake2();
                     break;
@@ -379,8 +387,9 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
                     extension.setPos("Basket");
-                    wrist.setBicepPos("Intake");
-                    wrist.setForearmPos("Intake");
+                    wrist.setBicepPos("Idle");
+                    wrist.setForearmPos("Idle");
+                    wrist.setRotationPos(0);
                     break;
                 case -1: // Hang Pivot Position
                     wrist.setBicepPos("Intake");
