@@ -23,7 +23,7 @@ public class Wrist {
     public Wrist(HardwareMap hwMap, HashMap<String, String> config) {
         bicep = hwMap.servo.get(config.get("bicep"));
         forearm = hwMap.servo.get(config.get("forearm"));
-        //rotation = hwMap.servo.get(config.get("rotation"));
+        rotation = hwMap.servo.get(config.get("rotation"));
 
         bicepPositions.put("Intake",      bIntake);
         bicepPositions.put("Basket",      bBasket);
@@ -50,7 +50,7 @@ public class Wrist {
     {
         bicep.setPosition(bicepPos);
         forearm.setPosition(forearmPos);
-        //rotation.setPosition(rotationPos);
+        rotation.setPosition(rotationPos);
     }
 
     public void setBicepPos(String pos)

@@ -25,7 +25,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
     private int incr = 1;
     boolean incrUpdate = false;
 
-    public static int maxSampleSteps = 8, maxSpecimenSteps = 4, maxIntakeSteps = 3;
+    public static int maxSampleSteps = 9, maxSpecimenSteps = 4, maxIntakeSteps = 3;
 
     boolean pivotReady, wristReady, extensionReady, swapReady, cycleReady, clawReady, turnReady;
     boolean wristManual = false, extensionManual = false, pivotManual = false;
@@ -165,6 +165,22 @@ public class IntoTheDeep_Active extends LinearOpMode {
 
             }
 
+            if (gamepad1.dpad_up && turnReady) {
+                wrist.setRotationPos(0);
+                turnReady = false;
+            }
+            else if (gamepad1.dpad_left && turnReady) {
+                wrist.setRotationPos(3);
+                turnReady = false;
+            }
+            else if (gamepad1.dpad_down && turnReady) {
+                wrist.setRotationPos(2);
+                turnReady = false;
+            }
+            else if (gamepad1.dpad_right && turnReady) {
+                wrist.setRotationPos(1);
+                turnReady = false;
+            }
 
             if(gamepad1.a) {
                 intake.outtake();
@@ -345,10 +361,21 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     if (pivot.getCurrent() > 1990) {
                         extension.setPos("Basket");
                     }
+                    if (extension.getCurrentPos() > 1000) {
+                        wrist.setBicepPos("Basket");
+                        wrist.setForearmPos("Basket");
+                    }
+                    break;
+                case 8:
+                    pivot.setPos("Basket");
+                    pivot.setkP("Extended");
+                    extension.setPos("Basket");
                     wrist.setBicepPos("Basket");
                     wrist.setForearmPos("Basket");
+                    intake.unclamp();
+                    intake.outtake2();
                     break;
-                case 8: // Flip Out
+                case 9: // Flip Out
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
                     extension.setPos("Basket");
