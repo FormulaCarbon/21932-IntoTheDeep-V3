@@ -22,10 +22,10 @@ public class ActiveIntake {
 
     private double tarPower, tarPos = clampUp;
 
-    public static double waitTime = 0.3, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 50, minThresh = 0.002, redGreenThresh = 0.002;
+    public static double waitTime = 0.0, redThresh = 0.007, blueThresh = 0.005, greenThresh = 0.01, redYellowThresh = 0.01, distanceThresh = 60, minThresh = 0.002, redGreenThresh = 0.002;
 
     private double redDelta = 0, blueDelta = 0, greenDelta = 0, distance = 100, minDelta, redGreenDelta;
-    public static double staticRed = 0.056, staticBlue = 0.0669, staticGreen = 0.088, holdPow = 0, outPow = 0.35, outPow2 = -0.35;
+    public static double staticRed = 0.026, staticBlue = 0.039, staticGreen = 0.049, holdPow = 0, outPow = 0.35, outPow2 = -0.5;
 
     private String blockColor = "None";
 
@@ -112,7 +112,7 @@ public class ActiveIntake {
 
     public void outtake2() {
         tarPower = outPow2;
-        unclamp();
+        //unclamp();
     }
 
 

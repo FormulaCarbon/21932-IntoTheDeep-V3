@@ -369,7 +369,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     }
                     if (extension.getCurrentPos() > 1000) {
                         wrist.setBicepPos("Basket");
-                        wrist.setForearmPos("Basket");
+                        wrist.setForearmPos("Idle");
                         wrist.setRotationPos(2);
                     }
                     break;
@@ -378,7 +378,7 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     pivot.setkP("Extended");
                     extension.setPos("Basket");
                     wrist.setBicepPos("Basket");
-                    wrist.setForearmPos("Basket");
+                    wrist.setForearmPos("Idle");
                     wrist.setRotationPos(2);
                     intake.unclamp();
                     intake.outtake2();
@@ -387,8 +387,8 @@ public class IntoTheDeep_Active extends LinearOpMode {
                     pivot.setPos("Basket");
                     pivot.setkP("Extended");
                     extension.setPos("Basket");
-                    wrist.setBicepPos("Idle");
-                    wrist.setForearmPos("Idle");
+                    wrist.setBicepPos("Basket");
+                    wrist.setForearmPos("Basket");
                     wrist.setRotationPos(0);
                     break;
                 case -1: // Hang Pivot Position
