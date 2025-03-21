@@ -16,7 +16,7 @@ public class Wrist {
     public static HashMap<String, Double> bicepPositions = new HashMap<String, Double>();
     public static HashMap<String, Double> forearmPositions = new HashMap<String, Double>();
 
-    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.87, fBasket = 0.05, bIdle = 0.82, fIdle = 0.21, bIntake = 0.88, fIntake = 0.21;
+    public static double autoPos = 0.63, intakepos = 0, bBasket = 0.87, fBasket = 0.61, bIdle = 0.85, fIdle = 0.1356, bIntake = 0.86, fIntake = 0.0;
 
     public static double[] rotationPositions = new double[5];
 
@@ -27,20 +27,22 @@ public class Wrist {
 
         bicepPositions.put("Intake",      bIntake);
         bicepPositions.put("Basket",      bBasket);
-        bicepPositions.put("Idle",        0.82);
-        bicepPositions.put("Start",       0.68);
-        bicepPositions.put("Auton Idle",  bIdle);
+        bicepPositions.put("Ready",       0.81);
+        bicepPositions.put("Idle",        0.795);
+        bicepPositions.put("Start",       0.74);
+        //bicepPositions.put("Auton Idle",  bIdle);
 
         forearmPositions.put("Intake",      fIntake);
         forearmPositions.put("Basket",      fBasket);
+        forearmPositions.put("Ready",       0.0367);
         forearmPositions.put("Idle",        fIdle);
         forearmPositions.put("Start",       1.0);
-        forearmPositions.put("Auton Idle",  fIdle);
+        //forearmPositions.put("Auton Idle",  fIdle);
 
-        rotationPositions[0] = 0.11;
-        rotationPositions[1] = 0.66;
-        rotationPositions[2] = 0.67;
-        rotationPositions[3] = 0.12;
+        rotationPositions[0] = 0.21;
+        rotationPositions[1] = 0.35;
+        rotationPositions[2] = 0.49;
+        rotationPositions[3] = 0.07;
         rotationPositions[4] = autoPos;
 
 

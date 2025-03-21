@@ -19,7 +19,7 @@ public class Extension {
 
     public static double kP = 0.01, kI = 0, kD = 0.0002;
     PIDController pidController = new PIDController(kP, kI, kD);
-    public static int PIDTol = 10, PIDThresh = 10, intake = 475 ;
+    public static int PIDTol = 10, PIDThresh = 10, intake = 500 ;
 
     public static HashMap<String, Integer> positions = new HashMap<String, Integer>();
 
