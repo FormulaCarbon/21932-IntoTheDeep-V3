@@ -74,7 +74,7 @@ public class IntoTheDeep extends LinearOpMode {
                 wristReady = false;
             }*/
 
-            /*if (gamepad2.dpad_up && turnReady) {
+            if (gamepad2.dpad_up && turnReady) {
                 wrist.setRotationPos(0);
                 turnReady = false;
             }
@@ -89,7 +89,7 @@ public class IntoTheDeep extends LinearOpMode {
             else if (gamepad2.dpad_right && turnReady) {
                 wrist.setRotationPos(1);
                 turnReady = false;
-            }*/
+            }
 
             if (gamepad2.right_bumper) {
                 sequence = "Specimen";
@@ -128,10 +128,22 @@ public class IntoTheDeep extends LinearOpMode {
                 turnReady = false;
             }
 
-            if (gamepad2.dpad_down && extensionReady) {
+            if (gamepad2.x && extensionReady) {
                 extension.setDirectPos(extension.getCurrentPos() - 50);
                 extensionManual = true;
                 extensionReady = false;
+            }
+
+            if (gamepad1.b) {
+                incr = -1;
+            }
+
+            if (gamepad1.y) {
+                incr = -2;
+            }
+
+            if (gamepad1.x) {
+                incr = -3;
             }
 
 
@@ -143,13 +155,13 @@ public class IntoTheDeep extends LinearOpMode {
                 drive.slowModeOf();
             }
 
-            if (gamepad2.y) {
+            /*if (gamepad2.y) {
                 drive.slowModeOn();
             }
 
             if (gamepad2.x) {
                 drive.slowModeOf();
-            }
+            }*/
 
             if (gamepad2.right_bumper || gamepad2.left_bumper || gamepad1.right_bumper || gamepad1.left_bumper)
             {
@@ -318,7 +330,7 @@ public class IntoTheDeep extends LinearOpMode {
                     extension.setPos("Idle");
                     break;
                 case -2: // Hang Extend
-                    pivot.setPos("Hang");
+                    pivot.setPos("Idle");
                     extension.setPos("Hang");
                     break;
                 case -3: // Hang Retract
