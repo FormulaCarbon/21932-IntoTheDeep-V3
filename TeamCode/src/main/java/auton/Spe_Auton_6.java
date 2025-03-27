@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import subsystems.Claw;
 import subsystems.Pivot;
 import subsystems.SpecMec;
 import subsystems.Util;
@@ -30,6 +31,7 @@ public class Spe_Auton_6 extends OpMode {
     private SpecMec specMec;
 
     private Wrist wrist;
+    private Claw claw;
 
     public static double hangX = 39, pickX = 13.5, pickY = 33, hangY = 74, blockX = 30, block3X = 18, block3Y = 10, blockY = 25, block2Y = 15, pushControlX = 63, parkX = 35, parkY = 66, pickX4 = 13.5, pickX3 = 14.5, hang3XChange = -8, hang4XChange = -10;
 
@@ -86,6 +88,10 @@ public class Spe_Auton_6 extends OpMode {
     private final Pose grab2Pose = new Pose(24, 38, pickUpAngle);
     private final Pose drop2Pose = new Pose(24, 38, dropOffAngle);
     private final Pose grab3Pose = new Pose(24, 28, pickUpAngle);
+    private final Pose drop3Pose = new Pose(24, 28, dropOffAngle);
+
+    double grabDelay = 0.5;
+
 
     private PathChain hangPreload, grab1, grab2, grab3, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, pick5, hang5, park;
 
@@ -138,7 +144,7 @@ public class Spe_Auton_6 extends OpMode {
         pick1 = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Point(grab3Pose),
+                                new Point(drop3Pose),
                                 new Point(pickupPose)
                         )
                 )
@@ -305,96 +311,102 @@ public class Spe_Auton_6 extends OpMode {
                 }
                 break;
             case 2: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
                     follower.turnTo(dropOffAngle);
                     setPathState(3);
                 }
                 break;
             case 3: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
                     follower.followPath(grab2, true);
                     setPathState(4);
                 }
                 break;
             case 4: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
                     follower.turnTo(dropOffAngle);
                     setPathState(5);
                 }
                 break;
             case 5: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
                     follower.followPath(grab3, true);
                     setPathState(6);
                 }
                 break;
             case 6: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
-                    follower.followPath(pick1, true);
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
+                    follower.turnTo(dropOffAngle);
                     setPathState(7);
                 }
                 break;
             case 7: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
-                    follower.followPath(hang1, true);
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
+                    follower.followPath(pick1, true);
                     setPathState(8);
                 }
                 break;
             case 8: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick2, true);
+                    follower.followPath(hang1, true);
                     setPathState(9);
                 }
                 break;
             case 9: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
-                    follower.followPath(hang2, true);
+                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
+                    follower.followPath(pick2, true);
                     setPathState(10);
                 }
                 break;
             case 10: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick3, true);
+                    follower.followPath(hang2, true);
                     setPathState(11);
                 }
                 break;
             case 11: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang3, true);
+                    follower.followPath(pick3, true);
                     setPathState(12);
                 }
                 break;
             case 12: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick4, true);
+                    follower.followPath(hang3, true);
                     setPathState(13);
                 }
                 break;
             case 13: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang4, true);
+                    follower.followPath(pick4, true);
                     setPathState(14);
                 }
                 break;
             case 14: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick5, true);
+                    follower.followPath(hang4, true);
                     setPathState(15);
                 }
                 break;
             case 15: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang5, true);
+                    follower.followPath(pick5, true);
                     setPathState(16);
                 }
                 break;
             case 16: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(park, true);
+                    follower.followPath(hang5, true);
                     setPathState(17);
                 }
                 break;
-            case 17:
+            case 17: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(park, true);
+                    setPathState(18);
+                }
+                break;
+            case 18:
                 if (!follower.isBusy()) {
                     setPathState(-1);
                 }
@@ -412,6 +424,7 @@ public class Spe_Auton_6 extends OpMode {
         pivot = new Pivot(hardwareMap, util.deviceConf);
         specMec = new SpecMec(hardwareMap, util.deviceConf);
         wrist = new Wrist(hardwareMap, util.deviceConf);
+        claw = new Claw(hardwareMap, util.deviceConf);
         pathTimer = new Timer();
         pivot.setPos("Start");
         wrist.setPos("Start");
@@ -427,6 +440,7 @@ public class Spe_Auton_6 extends OpMode {
     public void loop() {
         follower.update();
         pivot.update();
+
        // specMec.update();
         //specMec.updateClaw();
 //wrist.update();
@@ -435,6 +449,8 @@ public class Spe_Auton_6 extends OpMode {
         telemetry.addData("Position", follower.getPose().toString());
         telemetry.addData("pos", pivot.getTarget());
         telemetry.addData("pos", pivot.getPower());
+        telemetry.addData("pt", pathTimer.getElapsedTimeSeconds());
+
         telemetry.update();
         follower.drawOnDashBoard();
     }
