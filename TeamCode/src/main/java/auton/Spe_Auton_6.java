@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 import subsystems.Claw;
+import subsystems.Extension;
 import subsystems.Pivot;
 import subsystems.SpecMec;
 import subsystems.Util;
@@ -28,6 +29,7 @@ public class Spe_Auton_6 extends OpMode {
 
     private Timer pathTimer, actionTimer, opmodeTimer;
     private Pivot pivot;
+    private Extension extension;
     private SpecMec specMec;
 
     private Wrist wrist;
@@ -90,10 +92,17 @@ public class Spe_Auton_6 extends OpMode {
     private final Pose grab3Pose = new Pose(24, 28, pickUpAngle);
     private final Pose drop3Pose = new Pose(24, 28, dropOffAngle);
 
-    double grabDelay = 0.5;
+    private final Pose drop0Pose = new Pose(24, 50, dropOffAngle);
 
 
-    private PathChain hangPreload, grab1, grab2, grab3, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, pick5, hang5, park;
+    private final Pose drop4Pose = new Pose(24, 33, dropOffAngle);
+
+    public static double extensionDelay = 1000, grabDelay0 = 1500, upDelay0 = 1600, downDelay0 = 1400;
+    public static double grabDelay = 1650, upDelay = 1750, downDelay = 1500, retractDelay = 0.2, releaseDelay = 0.5, rmDelay = 0.6;
+    public static double grabDelayHub = 1000, upDelayHub = 1100, downDelayHub = 900;
+    public static double releaseDelay0 = 1500, rmDelay3 = 1.2;
+
+    private PathChain hangPreload, grab1, grab2, grab3, drop0, pick1, hang1, pick2, hang2, pick3, hang3, pick4, hang4, pick5, hang5, park;
 
     public void buildPaths() {
         hangPreload = follower.pathBuilder()
@@ -109,15 +118,32 @@ public class Spe_Auton_6 extends OpMode {
                 .addTemporalCallback(openTime0, () -> specMec.openClaw())
                 .build();
 
-        grab1 = follower.pathBuilder()
+        drop0 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 new Point(hang0Pose),
                                 new Point(28, 67, Point.CARTESIAN),
+                                new Point(drop0Pose)
+                        )
+                )
+                .setLinearHeadingInterpolation(hang0Pose.getHeading(), drop0Pose.getHeading())
+                .addTemporalCallback(extensionDelay, () -> extension.setPos("Intake"))
+                .addTemporalCallback(releaseDelay0, () -> claw.directSet(Claw.open))
+                .build();
+
+
+
+        grab1 = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(
+                                new Point(drop0Pose),
                                 new Point(grab1Pose)
                         )
                 )
-                .setLinearHeadingInterpolation(hang0Pose.getHeading(), grab1Pose.getHeading())
+                .setLinearHeadingInterpolation(drop0Pose.getHeading(), grab1Pose.getHeading())
+                .addTemporalCallback(downDelay, () -> wrist.setPos("Intake"))
+                .addTemporalCallback(grabDelay, () -> claw.directSet(Claw.closed))
+                .addTemporalCallback(upDelay, () -> wrist.setPos("Ready"))
                 .build();
 
 
@@ -129,6 +155,9 @@ public class Spe_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(drop1Pose.getHeading(), grab2Pose.getHeading())
+                .addTemporalCallback(downDelay, () -> wrist.setPos("Intake"))
+                .addTemporalCallback(grabDelay, () -> claw.directSet(Claw.closed))
+                .addTemporalCallback(upDelay, () -> wrist.setPos("Ready"))
                 .build();
 
         grab3 = follower.pathBuilder()
@@ -139,6 +168,10 @@ public class Spe_Auton_6 extends OpMode {
                         )
                 )
                 .setLinearHeadingInterpolation(drop2Pose.getHeading(), grab3Pose.getHeading())
+                .addTemporalCallback(downDelay, () -> wrist.setPos("Intake"))
+                .addTemporalCallback(grabDelay, () -> claw.directSet(Claw.closed))
+                .addTemporalCallback(upDelay, () -> wrist.setPos("Ready"))
+                .addTemporalCallback(retractDelay, () -> extension.setPos("Idle"))
                 .build();
 
         pick1 = follower.pathBuilder()
@@ -151,6 +184,8 @@ public class Spe_Auton_6 extends OpMode {
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .addTemporalCallback(closeTime1, () -> specMec.closeClaw())
                 .addTemporalCallback(500, () -> pivot.setPos("Basket"))
+                .addTemporalCallback(0, () -> extension.setPos("Idle"))
+                .addTemporalCallback(0, () -> claw.directSet(0.65))
                 .build();
 
         hang1 = follower.pathBuilder()
@@ -166,6 +201,9 @@ public class Spe_Auton_6 extends OpMode {
                 .addParametricCallback(idlePar, () -> specMec.setPosition("Idle", "Score"))
                 .addParametricCallback(scorePar, () -> specMec.setPosition("Score", "Score"))
                 .addParametricCallback(openPar, () -> specMec.openClaw())
+                .addTemporalCallback(downDelayHub, () -> wrist.setPos("Intake"))
+                .addTemporalCallback(grabDelayHub, () -> claw.directSet(Claw.closed))
+                .addTemporalCallback(upDelayHub, () -> wrist.setPos("Ready"))
                 .build();
 
         pick2 = follower.pathBuilder()
@@ -306,107 +344,135 @@ public class Spe_Auton_6 extends OpMode {
                 break;
             case 1: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(grab1, true);
+                    follower.followPath(drop0, true);
                     setPathState(2);
                 }
                 break;
             case 2: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.turnTo(dropOffAngle);
+                telemetry.addData("state", 1.5);
+                if (!follower.isBusy()) {
+
+                    telemetry.addData("state", 2);
+                    follower.followPath(grab1, true);
                     setPathState(3);
                 }
                 break;
             case 3: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.followPath(grab2, true);
+                telemetry.addData("state", 2.5);
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > upDelay) {
+
+                    telemetry.addData("state", 3);
+                    follower.turn(dropOffAngle - pickUpAngle, true);
                     setPathState(4);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > releaseDelay)
+                {
+                    claw.directSet(Claw.open);
                 }
                 break;
             case 4: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.turnTo(dropOffAngle);
+                telemetry.addData("state", 3.5);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > rmDelay) {
+                    telemetry.addData("state", 4);
+                    follower.followPath(grab2, true);
                     setPathState(5);
                 }
                 break;
             case 5: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.followPath(grab3, true);
+                telemetry.addData("state", 4.5);
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > upDelay) {
+                    telemetry.addData("state", 5);
+                    follower.turn(dropOffAngle - pickUpAngle, true);
                     setPathState(6);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > releaseDelay)
+                {
+                    claw.directSet(Claw.open);
                 }
                 break;
             case 6: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.turnTo(dropOffAngle);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > rmDelay) {
+                    follower.followPath(grab3, true);
                     setPathState(7);
                 }
                 break;
             case 7: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.followPath(pick1, true);
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > upDelay) {
+                    follower.turn(dropOffAngle - pickUpAngle, true);
                     setPathState(8);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > releaseDelay)
+                {
+                    claw.directSet(Claw.open);
                 }
                 break;
             case 8: // Wait until the robot is near the scoring position
-                if (!follower.isBusy()) {
-                    follower.followPath(hang1, true);
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > rmDelay3) {
+                    follower.followPath(pick1, true);
                     setPathState(9);
                 }
                 break;
             case 9: // Wait until the robot is near the scoring position
-                if (pathTimer.getElapsedTimeSeconds() > grabDelay && !follower.isBusy()) {
-                    follower.followPath(pick2, true);
+                if (!follower.isBusy()) {
+                    follower.followPath(hang1, true);
                     setPathState(10);
                 }
                 break;
             case 10: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang2, true);
+                    follower.followPath(pick2, true);
                     setPathState(11);
                 }
                 break;
             case 11: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick3, true);
+                    follower.followPath(hang2, true);
                     setPathState(12);
                 }
                 break;
             case 12: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang3, true);
+                    follower.followPath(pick3, true);
                     setPathState(13);
                 }
                 break;
             case 13: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick4, true);
+                    follower.followPath(hang3, true);
                     setPathState(14);
                 }
                 break;
             case 14: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang4, true);
+                    follower.followPath(pick4, true);
                     setPathState(15);
                 }
                 break;
             case 15: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(pick5, true);
+                    follower.followPath(hang4, true);
                     setPathState(16);
                 }
                 break;
             case 16: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(hang5, true);
+                    follower.followPath(pick5, true);
                     setPathState(17);
                 }
                 break;
             case 17: // Wait until the robot is near the scoring position
                 if (!follower.isBusy()) {
-                    follower.followPath(park, true);
+                    follower.followPath(hang5, true);
                     setPathState(18);
                 }
                 break;
-            case 18:
+            case 18: // Wait until the robot is near the scoring position
+                if (!follower.isBusy()) {
+                    follower.followPath(park, true);
+                    setPathState(19);
+                }
+                break;
+            case 19:
                 if (!follower.isBusy()) {
                     setPathState(-1);
                 }
@@ -425,6 +491,7 @@ public class Spe_Auton_6 extends OpMode {
         specMec = new SpecMec(hardwareMap, util.deviceConf);
         wrist = new Wrist(hardwareMap, util.deviceConf);
         claw = new Claw(hardwareMap, util.deviceConf);
+        extension = new Extension(hardwareMap, util.deviceConf);
         pathTimer = new Timer();
         pivot.setPos("Start");
         wrist.setPos("Start");
@@ -440,16 +507,19 @@ public class Spe_Auton_6 extends OpMode {
     public void loop() {
         follower.update();
         pivot.update();
-
-       // specMec.update();
+        extension.update();
+       //specMec.update();
         //specMec.updateClaw();
-//wrist.update();
+        //wrist.update();
         autonomousPathUpdate();
         telemetry.addData("Path State", pathState);
         telemetry.addData("Position", follower.getPose().toString());
         telemetry.addData("pos", pivot.getTarget());
         telemetry.addData("pos", pivot.getPower());
         telemetry.addData("pt", pathTimer.getElapsedTimeSeconds());
+        telemetry.addData("busy", follower.isBusy());
+        telemetry.addData("error", follower.getHeadingOffset());
+        telemetry.addData("error", follower.getCurrentPath());
 
         telemetry.update();
         follower.drawOnDashBoard();
@@ -458,16 +528,17 @@ public class Spe_Auton_6 extends OpMode {
     @Override
     public void start() {
         wrist.setPos("Start");
-        pivot.setPos("Basket");
+        pivot.setPos("Down");
+        extension.setPos("Idle");
         setPathState(0);
     }
 
     @Override
     public void init_loop() {
-        /*wrist.update();
+        wrist.update();
         pivot.update();
-        specMec.update();
-        specMec.updateClaw();*/
+        //specMec.update();
+        //specMec.updateClaw();
     }
     
 
